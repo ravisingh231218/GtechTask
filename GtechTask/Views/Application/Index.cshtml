@@ -1,0 +1,197 @@
+﻿@* @model GtechTask.Models.EMIUser
+<h1>Calculate EMI</h1>
+<form method="post" asp-action="CalculateEMI">
+    <div>
+        <lable asp-for="PlaneName"></lable>
+                <select asp-for="PlaneName" class="form-control" asp-items="Html.GetEnumSelectList<PlaneName>()">
+                    <option value=""></option>
+                </select>
+
+        
+    </div>
+    <div>
+        <lable for="Tenure">Tenure:</lable>
+        <input type="number" name="Tenure" id="Tenure" required />
+    </div>
+    <div>
+        <lable for="ROI">ROI(%)</lable>
+        <input type="number" name="ROI" id="ROI" required />
+    </div>
+    <div>
+        <lable for="LoanAmount">LoanAmount</lable>
+        <input type="number" name="LoanAmount" id="LoanAmount" required />
+    </div>
+    <div>
+        <lable asp-for="LoanDate">LoanDate</lable>
+        <input type="date" name="LoanDate" id="LoanDate" required />
+    </div>
+    <button type="submit">Calculate EMI</button>
+</form>
+@if (ViewData["EMIAmount"] != null)
+{
+    <h2>EMI Amount: @ViewData["EMIAmount"]</h2>
+}
+@if (ViewData["EMISchedule"] != null)
+{
+    <h2> EMI Schedule</h2>
+    <table>
+        <tr>
+            <th> EMI No</th>
+            <th> Due Date</th>
+            <th>EMI Amount</th>
+            
+
+        </tr>
+        @foreach (var item in (EMI[])ViewData["EMISchedule"])
+        {
+            <tr>
+                <td>@item.EmiNo</td>
+                <td>@item.DueDate.ToShortDateString()</td>
+                <td>@item.EmiAmount</td>
+
+
+            </tr>
+        }
+    </table>
+} *@
+
+
+@model EMIUser
+@{
+    ViewData["Title"] = "Calculate EMI";
+}
+
+<h2>Calculate EMI</h2>
+
+<form asp-action="CalculateEMI" method="post">
+
+    <div class="form-group">
+        <label for="PlaneName">Plan Name</label>
+        <select id="PlaneName" asp-for="PlaneName" class="form-control" asp-items="@(ViewBag.Plans)" onchange="fetchPlanDetails()">
+            <option value="">--Select Plan--</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="Tenure">Tenure (Months)</label>
+        <input type="number" asp-for="Tenure" id="Tenure" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label for="ROI">Rate of Interest (%)</label>
+        <input type="number" asp-for="ROI" id="ROI" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label for="LoanAmount">Loan Amount</label>
+        <input type="number" asp-for="LoanAmount" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="LoanDate">Loan Date</label>   
+        <input type="date" asp-for="LoanDate" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Calculate EMI</button>
+
+
+</form>
+
+@if (Model != null && Model.EMISchedule != null && Model.EMISchedule.Count > 0)
+{
+    <h2>Calculated EMI Amount</h2>
+    <p><strong>EMI Amount: </strong>@Model.EMISchedule.First().EmiAmount</p>
+    <form asp-action="GenerateSchedule" method="post">
+        <input type="hidden" asp-for="PlaneName" />
+        <input type="hidden" asp-for="Tenure" />
+        <input type="hidden" asp-for="ROI" />
+        <input type="hidden" asp-for="LoanAmount" />
+        <input type="hidden" asp-for="LoanDate" />
+        <button type="submit" class="btn btn-success">Generate Schedule</button>
+    </form>
+}
+
+@if (Model.EMISchedule != null && Model.EMISchedule.Count > 0 && Model.ScheduleGenerated)
+{
+    <h2>EMI Schedule</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>EMI No</th>
+                <th>Due Date</th>
+                <th>EMI Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emi in Model.EMISchedule)
+            {
+                <tr>
+                    <td>@emi.EmiNo</td>
+                    <td>@emi.DueDate.ToShortDateString()</td>
+                    <td>@emi.EmiAmount.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* 
+@if (Model.EMISchedule != null && Model.EMISchedule.Count > 0)
+{
+    <h2>EMI Schedule</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>EMI No</th>
+                <th>Due Date</th>
+                <th>EMI Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emi in Model.EMISchedule)
+            {
+                <tr>
+                    <td>@emi.EmiNo</td>
+                    <td>@emi.DueDate.ToShortDateString()</td>
+                    <td>@emi.EmiAmount.ToString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+} *@
+
+@* @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function fetchPlanDetails() {
+            var planeName = $('#PlaneName').val();
+            if (planeName) {
+                $.getJSON('@Url.Action("GetPlanDetails", "Application")', { planeName: planeName }, function (data) {
+                    if (data) {
+                        $('#Tenure').val(data.TenureMonths);
+                        $('#ROI').val(data.ROI);
+                    }
+                });
+            }
+        }
+    </script>
+} *@
+
+
+
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function fetchPlanDetails() {
+            var planeName = $('#PlaneName').val();
+            if (planeName) {
+                $.getJSON('@Url.Action("GetPlanDetails", "Application")', { planeName: planeName }, function (data) {
+                    if (data) {
+                        $('#Tenure').val(data.tenureMonths);
+                        $('#ROI').val(data.roi);
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+

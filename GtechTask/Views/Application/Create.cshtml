@@ -1,0 +1,21 @@
+﻿@model GtechTask.Models.Users
+
+<h1>Create Employee</h1>
+<form asp-action="Create">
+    <div class="form-group">
+        <lable asp-for="PlaneName"></lable>
+        <input asp-for="PlaneName" class="form-control" placeholder="PlaneName" />
+        <span asp-validation-for="PlaneName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <lable asp-for="TenureMonths"></lable>
+        <input asp-for="TenureMonths" class="form-control" placeholder="TenureMonths" />
+        <span asp-validation-for="TenureMonths" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <lable asp-for="ROI"></lable>
+        <input asp-for="ROI" class="form-control" placeholder="ROI(%)" />
+        <span asp-validation-for="ROI" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
